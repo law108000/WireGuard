@@ -1,0 +1,106 @@
+version: '3.8'
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ./wg0.conf:/etc/wireguard/wg0.conf
+    cap_add:
+      - NET_ADMIN             # Required for WireGuard, give container network admin privileges
+      - SYS_MODULE            # Required for WireGuard, give container access to kernel modules
+    devices:
+      - /dev/net/tun          # Required for WireGuard, give container access to TUN device
+    sysctls:
+      - net.ipv4.ip_forward=1 # Required for WireGuard, enable IP forwarding
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ./wg0-client.conf:/etc/wireguard/wg0-client.conf
+    cap_add:
+      - NET_ADMIN             # Required for WireGuard, give container network admin privileges
+      - SYS_MODULE            # Required for WireGuard, give container access to kernel modules
+    devices:
+      - /dev/net/tun          # Required for WireGuard, give container access to TUN device
+    sysctls:
+      - net.ipv4.ip_forward=1 # Required for WireGuard, enable IP forwarding
+  # wireguard-server-01:
+  #   image: linuxserver/wireguard
+  #   container_name: wireguard-server-01
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - SYS_MODULE
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #     - SERVERURL=wireguard.example.com #optional
+  #     - SERVERPORT=51820 #optional
+  #     - PEERS=1 #optional
+  #     - PEERDNS=auto #optional
+  #     - INTERNAL_SUBNET=
+  #     - ALLOWEDIPS=
+  #     - EXTERNAL_PORT=51820
+  #   volumes:
+  #     - ./server01/config:/config
+  #     - ./server01/lib/modules:/lib/modules
+  #   ports:
+  #     - 51820:51820/udp
+  #   sysctls:
+  #     - net.ipv4.conf.all.src_valid_mark=1
+  #   restart: unless-stopped
+  
+  # wireguard-server-02:
+  #   image: linuxserver/wireguard
+  #   container_name: wireguard-server-02
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - SYS_MODULE
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #     - SERVERURL=wireguard2.example.com #optional
+  #     - SERVERPORT=51821 #optional
+  #     - PEERS=1 #optional
+  #     - PEERDNS=auto #optional
+  #     - INTERNAL_SUBNET=
+  #     - ALLOWEDIPS=
+  #     - EXTERNAL_PORT=51821
+  #   volumes:
+  #     - ./server02/config:/config
+  #     - ./server02/lib/modules:/lib/modules
+  #   ports:
+  #     - 51821:51821/udp
+  #   sysctls:
+  #     - net.ipv4.conf.all.src_valid_mark=1
+  #   restart: unless-stopped
+
+  # # wireguard-client-01:
+  # #   image: linuxserver/wireguard
+  # #   container_name: wireguard-client-01
+  # #   cap_add:
+  # #     - NET_ADMIN
+  # #     - SYS_MODULE
+  # #   environment:
+  # #     - PUID=1000
+  # #     - PGID=1000
+  # #     - TZ=Europe/London
+  # #     - PEERDNS=auto #optional
+  # #     - SERVERURL=wireguard.example.com
+  # #     - SERVERPORT=51820
+  # #     - PEERS=1
+  # #     - ALLOWEDIPS=
+  # #     - INTERNAL_SUBNET=
+  # #     - EXTERNAL_PORT=51820
+  # #   volumes:
+  # #     - ./client01/config:/config
+  # #     - ./client01/lib/modules:/lib/modules
+  # #   ports:
+  # #     - 51820:51820/udp
+  # #   sysctls:
+  # #     - net.ipv4.conf.all.src_valid_mark=1
