@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 ubuntu:22.04
 
 # update and install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y \
     curl \
     wget \
     git \
@@ -25,9 +25,11 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
-# install wireguard
-RUN apt-get update && apt-get install -y wireguard-tools && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y \
+    wireguard-tools \
+    && rm -rf /var/lib/apt/lists/*
 
-# start wireguard
-# CMD ["wg-quick", "up", "wg0"]
+# install wireguard client
+# RUN apt update && apt install -y wireguard && rm -rf /var/lib/apt/lists/*
+
 CMD ["tail", "-f", "/dev/null"]

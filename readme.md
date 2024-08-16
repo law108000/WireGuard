@@ -71,3 +71,8 @@ wg-quick up wg-client.conf
 ```shell
 sudo wg show
 ```
+
+
+```shell
+docker run ghcr.io/wg-easy/wg-easy wgpw 12345678
+```
