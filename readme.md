@@ -174,6 +174,12 @@ ping 10.8.1.3
 curl ifconfig.me
 ```
 
+## Environment Setup
+### start docker compose services
+```shell
+docker-compose up -d
+```
+
 ## References
 1. [WireGuard](https://www.wireguard.com/)
 2. [WireGuard Quick Start](https://www.wireguard.com/quickstart/)
