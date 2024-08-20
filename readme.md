@@ -2,7 +2,10 @@
 This is a simple PoC for setting up a WireGuard VPN server and client. WireGuard is a modern VPN protocol that is faster, simpler, and more secure than traditional VPN protocols like OpenVPN and IPsec.
 
 ## Architecture
+Server is running on a public IP address and the peers are running on private IP addresses. The server acts as a gateway for the peers to communicate with each other. The server assigns a unique IP address to each peer and routes the traffic between the peers.
+
 ### 1. Basic [WireGuard](https://www.wireguard.com/) Setup
+In our case, the server is running locally on the machine and the peers are running on different machines. They communicate with each other using the WireGuard protocol (UDP port 51830).
 ```mermaid
 flowchart TB
     wg_peer1[10.8.1.2:51830] --> server[10.8.1.1:51830]
@@ -10,6 +13,7 @@ flowchart TB
     wg_peer3[10.8.1.4:51830] --> server
 ```
 ### 2. [WireGuard Easy](https://github.com/wg-easy/wg-easy) Setup
+WireGuard Easy is a simple and easy-to-use WireGuard VPN server and client setup. It provides a web interface to manage the WireGuard configuration and allows you to add, remove, and edit peers easily.
 ```mermaid
 flowchart TB
     wg_peer1[10.8.0.2:51820] --> server[10.8.0.1:51820]
@@ -192,7 +196,7 @@ ping 10.8.1.2
 # From client(10.8.1.2)
 ping 10.8.1.3
 ```
-### 3. Check the public IP address
+### 4. Check the public IP address
 ```shell
 curl ifconfig.me
 ```
@@ -201,6 +205,44 @@ curl ifconfig.me
 ### start docker compose services
 ```shell
 docker-compose up -d
+```
+
+## Clean Up
+### stop the wg server
+```shell
+# run this command in the server machine(10.8.1.1)
+wg-quick down wg0
+```
+### stop the wg client
+```shell
+# run this command in the client machine(10.8.1.2)
+wg-quick down wg1
+```
+
+## Troubleshooting
+### manually remove the linking layer
+```bash
+# remove the wireguard interface if it is not removed by wg-quick down
+ip link delete wg0
+```
+### manually remove the iptables rules
+```bash
+iptables -t nat -D POSTROUTING -s
+iptables -D INPUT -p udp -m udp --dport 51820 -j ACCEPT
+iptables -D FORWARD -i wg0 -j ACCEPT
+iptables -D FORWARD -o wg0 -j ACCEPT
+```
+### manually remove the wireguard peer
+```bash
+wg set wg0 peer <public_key> remove
+```
+### check the iptables rules
+```bash
+iptables -L
+```
+### check the wireguard interface
+```bash
+ip a show wg0
 ```
 
 ## References
