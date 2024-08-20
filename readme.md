@@ -1,23 +1,38 @@
 # WireGuard VPN PoC
+This is a simple PoC for setting up a WireGuard VPN server and client. WireGuard is a modern VPN protocol that is faster, simpler, and more secure than traditional VPN protocols like OpenVPN and IPsec.
 
+## Architecture
+### 1. Basic WireGuard Setup
 ```mermaid
 flowchart TB
-    wg_peer1[10.8.1.2] --> server[10.8.1.1]
-    wg_peer2[10.8.1.3] --> server
-    wg_peer3[10.8.1.4] --> server
+    wg_peer1[10.8.1.2:51830] --> server[10.8.1.1:51830]
+    wg_peer2[10.8.1.3:51830] --> server
+    wg_peer3[10.8.1.4:51830] --> server
+```
+### 2. WireGuard Easy Setup
+```mermaid
+flowchart TB
+    wg_peer1[10.8.0.2:51820] --> server[10.8.0.1:51820]
+    wg_peer2[10.8.0.3:51820] --> server
+    wg_peer3[10.8.0.4:51820] --> server
 ```
 
 ## Key Pair Generation
 Since WireGuard uses public/private key pairs for authentication, you need to generate a pair of keys for the server and each client. The private key should be kept secret and should not be shared with anyone. The public key can be shared with anyone.
 
-### 1. generate client keys
+### 1. generate client key pair
 ```bash
 wg genkey | tee client_private.key | wg pubkey > client_public.key
 ```
 
-### 2. generate server keys
+### 2. generate server key pair
 ```bash
 wg genkey | tee server_private.key | wg pubkey > server_public.key
+```
+### 3. generate preshared key (optional)
+Preshared keys are used to authenticate the server and client. It is optional but recommended for additional security.
+```bash
+wg genpsk | tee preshared.key
 ```
 
 ## WG Server
@@ -25,9 +40,9 @@ wg genkey | tee server_private.key | wg pubkey > server_public.key
 ```bash
 # Server
 [Interface]
-PrivateKey = +LoS4rKh1KvTvK+imYoAnEjjS5vAa9ujurE/b/9pnE0=
-Address = 10.8.1.1/24
-ListenPort = 51830
+PrivateKey = +LoS4rKh1KvTvK+imYoAnEjjS5vAa9ujurE/b/9pnE0=       # server's private key
+Address = 10.8.1.1/24                                           # server's IP address
+ListenPort = 51830                                              # default port is 51820
 PreUp = 
 PostUp =  iptables -t nat -A POSTROUTING -s 10.8.1.0/24 -o eth0 -j MASQUERADE; iptables -A INPUT -p udp -m udp --dport 51820 -j ACCEPT; iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; 
 PreDown = 
@@ -38,9 +53,9 @@ Note: Replace the PrivateKey and Address with the server's private key and IP ad
 ```bash
 # Client: wg0 (91f6f4a6-09ee-47d0-a569-1bb85673f167)
 [Peer]
-PublicKey = dR4KpOGGCAG7/9DTDzIXYZXN5IJKJVbB7plfmEvf/FE=
-PresharedKey = Z7Kn07cSKHedWUv7VMHdNxX0yX1+ULbcl9ovzMVYc60=
-AllowedIPs = 10.8.1.2/32
+PublicKey = dR4KpOGGCAG7/9DTDzIXYZXN5IJKJVbB7plfmEvf/FE=        # client's public key
+PresharedKey = Z7Kn07cSKHedWUv7VMHdNxX0yX1+ULbcl9ovzMVYc60=     # preshared key (optional)
+AllowedIPs = 10.8.1.2/32                                        # client's IP address (must be unique)
 
 # Client: wg1 (067704e6-8fdb-4539-90b6-27b4d60fb678)
 [Peer]
@@ -108,13 +123,13 @@ ip a show wg0
 ```shell
 # /etc/wireguard/wg1.conf in client machine
 [Interface]
-PrivateKey = mHgsNG46q2brAWrIkBUsb38z/9Ia0eE4aWPdW4DQvlk=
+PrivateKey = mHgsNG46q2brAWrIkBUsb38z/9Ia0eE4aWPdW4DQvlk=       # client's private key
 Address = 10.8.1.2/24
 DNS = 1.1.1.1
 
 [Peer]
-PublicKey = td2y2HOUProuNqUMZGU6E26+tff+EkYH0sym2YQytAg=
-PresharedKey = Z7Kn07cSKHedWUv7VMHdNxX0yX1+ULbcl9ovzMVYc60=
+PublicKey = td2y2HOUProuNqUMZGU6E26+tff+EkYH0sym2YQytAg=        # server's public key
+PresharedKey = Z7Kn07cSKHedWUv7VMHdNxX0yX1+ULbcl9ovzMVYc60=     # preshared key (optional)
 AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 0
 Endpoint = 192.168.3.253:51830
