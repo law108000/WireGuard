@@ -2,14 +2,14 @@
 This is a simple PoC for setting up a WireGuard VPN server and client. WireGuard is a modern VPN protocol that is faster, simpler, and more secure than traditional VPN protocols like OpenVPN and IPsec.
 
 ## Architecture
-### 1. Basic WireGuard Setup
+### 1. Basic [WireGuard](https://www.wireguard.com/) Setup
 ```mermaid
 flowchart TB
     wg_peer1[10.8.1.2:51830] --> server[10.8.1.1:51830]
     wg_peer2[10.8.1.3:51830] --> server
     wg_peer3[10.8.1.4:51830] --> server
 ```
-### 2. WireGuard Easy Setup
+### 2. [WireGuard Easy](https://github.com/wg-easy/wg-easy) Setup
 ```mermaid
 flowchart TB
     wg_peer1[10.8.0.2:51820] --> server[10.8.0.1:51820]
