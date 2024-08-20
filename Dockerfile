@@ -1,35 +1,16 @@
-FROM --platform=linux/amd64 ubuntu:22.04
+FROM alpine:latest
+
+WORKDIR /app
 
 # update and install dependencies
-RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y \
-    curl \
-    wget \
-    git \
-    unzip \
-    vim \
-    nano \
-    sudo \
-    iputils-ping \
-    net-tools \
-    iproute2 \
+RUN apk update && apk upgrade && apk add --no-cache \
+    dpkg \
+    dumb-init \
     iptables \
-    dnsutils \
-    iperf \
-    iperf3 \
-    nmap \
-    tcpdump \
-    traceroute \
-    mtr \
-    telnet \
-    openssh-client \
-    openssh-server \
-    && rm -rf /var/lib/apt/lists/*
+    iptables-legacy \
+    wireguard-tools
 
-RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y \
-    wireguard-tools \
-    && rm -rf /var/lib/apt/lists/*
-
-# install wireguard client
-# RUN apt update && apt install -y wireguard && rm -rf /var/lib/apt/lists/*
+# Use iptables-legacy
+RUN update-alternatives --install /sbin/iptables iptables /sbin/iptables-legacy 10 --slave /sbin/iptables-restore iptables-restore /sbin/iptables-legacy-restore --slave /sbin/iptables-save iptables-save /sbin/iptables-legacy-save
 
 CMD ["tail", "-f", "/dev/null"]
