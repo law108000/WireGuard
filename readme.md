@@ -1,4 +1,12 @@
 # WireGuard VPN PoC
+
+```mermaid
+flowchart TB
+    wg_peer1[10.8.1.2] --> server[10.8.1.1]
+    wg_peer2[10.8.1.3] --> server
+    wg_peer3[10.8.1.4] --> server
+```
+
 ## Key Pair Generation
 Since WireGuard uses public/private key pairs for authentication, you need to generate a pair of keys for the server and each client. The private key should be kept secret and should not be shared with anyone. The public key can be shared with anyone.
 
